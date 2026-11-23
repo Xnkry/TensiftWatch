@@ -87,3 +87,16 @@ Launch Jupyter from `notebooks/` and run `merge_all.ipynb` from top to bottom to
 write `data/processed/tensift_cleaned.csv`. To regenerate the separate August
 CSV, run `data_cleaning.ipynb`. Both notebooks overwrite their respective output
 files; review the resulting CSV changes before committing them.
+
+## Troubleshooting notebooks
+
+- **CSV file not found:** launch Jupyter from `notebooks/`. The data paths are
+  relative to the notebook working directory.
+- **Excel workbook not found:** the cleaning notebooks need the local files
+  listed above. Use `first_insights.ipynb` to explore the committed CSVs without
+  rebuilding them.
+- **Missing Python package:** activate `tensiftwatch` before starting Jupyter
+  and check that the notebook kernel uses that environment. After updating
+  dependencies, restart the kernel and run the cells from the top.
+- **Variables are undefined or plots look stale:** restart the kernel and run
+  all cells in order so results use the current data and code.
