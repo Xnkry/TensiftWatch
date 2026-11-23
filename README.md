@@ -74,3 +74,16 @@ series or calculating elapsed days.
 The combined dataset already includes August; appending the August CSV would
 duplicate those observations. These counts describe the currently committed
 files and should be updated when the datasets change.
+
+### Rebuilding the processed data
+
+Create `data/raw/` at the repository root and place these source workbooks in it:
+
+- `data_barrages_tensift_aout_2026.xlsx`
+- `data_barrages_tensift_sept_2026.xlsx`
+- `data_barrages_tensift_oct_2026.xlsx`
+
+Launch Jupyter from `notebooks/` and run `merge_all.ipynb` from top to bottom to
+write `data/processed/tensift_cleaned.csv`. To regenerate the separate August
+CSV, run `data_cleaning.ipynb`. Both notebooks overwrite their respective output
+files; review the resulting CSV changes before committing them.
