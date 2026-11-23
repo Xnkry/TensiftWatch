@@ -63,3 +63,14 @@ Each row represents one dam on one date. The CSVs use these columns:
 
 Read `date` with `pd.read_csv(path, parse_dates=["date"])` when plotting time
 series or calculating elapsed days.
+
+### Included dataset coverage
+
+| File | Dates (inclusive) | Rows | Dams |
+| --- | --- | ---: | ---: |
+| `tensift_august_2026.csv` | 2026-08-01 to 2026-08-31 | 155 | 5 |
+| `tensift_cleaned.csv` | 2026-08-01 to 2026-10-31 | 460 | 5 |
+
+The combined dataset already includes August; appending the August CSV would
+duplicate those observations. These counts describe the currently committed
+files and should be updated when the datasets change.
