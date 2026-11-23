@@ -48,3 +48,18 @@ definition. Restart any running notebook kernels to use the updated packages.
 The cleaning notebooks require source Excel workbooks in `data/raw/`, which is
 excluded from Git. Their expected filenames are listed in the notebooks. The
 included processed CSVs let you explore the analysis without those workbooks.
+
+### Processed data columns
+
+Each row represents one dam on one date. The CSVs use these columns:
+
+| Column | Meaning | Format or unit |
+| --- | --- | --- |
+| `date` | Observation date | `YYYY-MM-DD` |
+| `dam` | Dam name as recorded in the source | Text |
+| `capacity_mm3` | Reservoir capacity | Million cubic metres (Mm³) |
+| `reserve_mm3` | Stored water volume | Million cubic metres (Mm³) |
+| `fill_rate` | Reservoir fill percentage | Percent, not a 0–1 fraction |
+
+Read `date` with `pd.read_csv(path, parse_dates=["date"])` when plotting time
+series or calculating elapsed days.
