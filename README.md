@@ -20,6 +20,19 @@ paths resolve correctly.
 Start with [first_insights.ipynb](notebooks/first_insights.ipynb) for summary
 statistics and plots using the included processed data.
 
+### Updating the environment
+
+After pulling changes to `environment.yml`, run these commands from the
+repository root to update the existing environment:
+
+```sh
+conda env update --name tensiftwatch --file environment.yml --prune
+conda activate tensiftwatch
+```
+
+The `--prune` option removes dependencies no longer required by the environment
+definition. Restart any running notebook kernels to use the updated packages.
+
 ## Data and notebooks
 
 - [data/processed/](data/processed/) contains the committed CSV datasets.
