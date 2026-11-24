@@ -100,3 +100,19 @@ files; review the resulting CSV changes before committing them.
   dependencies, restart the kernel and run the cells from the top.
 - **Variables are undefined or plots look stale:** restart the kernel and run
   all cells in order so results use the current data and code.
+
+## Interpreting the analysis
+
+The [fill rate distribution notebook](notebooks/Fill%20Rate%20Distribution%20-%20Lalla%20Takerkoust.ipynb)
+shows the frequency of observed daily fill rates for Lalla Takerkoust. Missing
+fill rates are excluded; histogram counts describe observations, not forecasts.
+
+Monthly summaries retain both year and month. Average fill rates give each
+recorded observation equal weight; they are not capacity-weighted basin totals.
+Missing observations can therefore change the period represented by an average.
+
+EDA correlations are computed within each dam. Reserve and fill rate describe
+related quantities, so their correlation is not evidence of an independent
+causal relationship. Linear regression plots describe historical trends in
+Mm³/day and should not be treated as validated forecasts. Fits require at least
+two distinct observation dates.
