@@ -17,6 +17,7 @@ def validate_csv(path):
         rows = list(reader)
     if not rows:
         raise ValueError("Dataset contains no observations")
+    seen = set()
     for line, row in enumerate(rows, start=2):
         if None in row or any(value is None for value in row.values()):
             raise ValueError(f"Line {line}: expected {len(COLUMNS)} fields")
@@ -42,4 +43,8 @@ def validate_csv(path):
         for column in ("reserve_mm3", "fill_rate"):
             if row[column] and float(row[column]) < 0:
                 raise ValueError(f"Line {line}: {column} must be nonnegative")
+        key = (row["date"], row["dam"])
+        if key in seen:
+            raise ValueError(f"Line {line}: duplicate dam/date observation {key}")
+        seen.add(key)
     return rows

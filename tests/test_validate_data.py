@@ -48,6 +48,14 @@ class ValidationTests(unittest.TestCase):
     def test_zero_and_above_capacity_measurements(self):
         self.validate(["2026-08-01,Dam,100,0,0", "2026-08-02,Dam,100,110,110"])
 
+    def test_duplicate_observations(self):
+        row = "2026-08-01,Dam,100,25,25"
+        with self.assertRaisesRegex(ValueError, "duplicate"):
+            self.validate([row, row])
+
+    def test_same_date_for_different_dams(self):
+        self.validate(["2026-08-01,Dam A,100,25,25", "2026-08-01,Dam B,100,25,25"])
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 
