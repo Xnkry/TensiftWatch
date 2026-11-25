@@ -63,3 +63,28 @@ def summarize(rows):
             for column in COLUMNS[2:]
         },
     }
+
+
+def main(argv=None):
+    """Validate one or more CSVs; return a failing status if any are invalid."""
+    import argparse
+    import json
+    import sys
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("paths", nargs="+", type=Path, help="Processed CSV files")
+    args = parser.parse_args(argv)
+    failed = False
+    for path in args.paths:
+        try:
+            result = summarize(validate_csv(path))
+        except (OSError, UnicodeError, ValueError, csv.Error) as error:
+            print(f"{path}: {error}", file=sys.stderr)
+            failed = True
+        else:
+            print(json.dumps({"path": str(path), **result}, sort_keys=True))
+    return int(failed)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

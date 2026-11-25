@@ -1,8 +1,11 @@
+import contextlib
+import io
+import json
 import tempfile
 import unittest
 from pathlib import Path
 
-from src.validate_data import COLUMNS, summarize, validate_csv
+from src.validate_data import COLUMNS, main, summarize, validate_csv
 
 
 class ValidationTests(unittest.TestCase):
@@ -63,6 +66,19 @@ class ValidationTests(unittest.TestCase):
         self.assertEqual((result["start"], result["end"]), ("2026-08-01", "2026-08-02"))
         self.assertEqual(result["missing"], {"capacity_mm3": 0, "reserve_mm3": 1, "fill_rate": 1})
         self.assertIsNone(summarize([])["start"])
+
+    def test_cli_continues_after_missing_file(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "valid.csv"
+            path.write_text(",".join(COLUMNS) + "\n2026-08-01,Dam,100,25,25\n")
+            output, errors = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
+                status = main([str(path.with_name("missing.csv")), str(path)])
+            self.assertEqual(status, 1)
+            self.assertIn("missing.csv", errors.getvalue())
+            self.assertEqual(json.loads(output.getvalue())["rows"], 1)
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(main([str(path)]), 0)
 
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
