@@ -1,6 +1,7 @@
 """Read and validate TensiftWatch processed CSV files without dependencies."""
 
 import csv
+from datetime import date
 from pathlib import Path
 
 COLUMNS = ("date", "dam", "capacity_mm3", "reserve_mm3", "fill_rate")
@@ -18,4 +19,10 @@ def validate_csv(path):
     for line, row in enumerate(rows, start=2):
         if None in row or any(value is None for value in row.values()):
             raise ValueError(f"Line {line}: expected {len(COLUMNS)} fields")
+        try:
+            parsed_date = date.fromisoformat(row["date"])
+            if parsed_date.isoformat() != row["date"]:
+                raise ValueError
+        except ValueError:
+            raise ValueError(f"Line {line}: date must be a valid YYYY-MM-DD") from None
     return rows
