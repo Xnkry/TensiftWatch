@@ -116,3 +116,30 @@ related quantities, so their correlation is not evidence of an independent
 causal relationship. Linear regression plots describe historical trends in
 Mm³/day and should not be treated as validated forecasts. Fits require at least
 two distinct observation dates.
+
+## Checking processed data
+
+From the repository root, validate the included CSVs using Python alone:
+
+```sh
+python -m src.validate_data data/processed/tensift_august_2026.csv data/processed/tensift_cleaned.csv
+```
+
+The command checks the exact column order, row structure, calendar dates,
+nonblank dam names without surrounding whitespace, finite numeric measurements,
+positive capacities, nonnegative reserves and fill rates, and unique dam/date
+pairs within each file. Empty measurement fields are allowed and counted in the
+summary. Values above capacity or 100% are retained for investigation, rather
+than automatically rejected. The check does not verify source accuracy,
+reserve/fill-rate consistency, or uninterrupted daily coverage.
+
+Each valid file produces one JSON line with row and dam counts, date bounds,
+and missing-value counts. Errors go to standard error; exit status is 1 if any
+file fails and 0 if all files pass. All supplied files are checked even if an
+earlier file fails. Validation does not modify the files.
+
+Run the validator's regression tests without installing extra dependencies:
+
+```sh
+python -m unittest discover -s tests
+```
