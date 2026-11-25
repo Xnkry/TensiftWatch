@@ -35,6 +35,11 @@ class ValidationTests(unittest.TestCase):
     def test_missing_measurements(self):
         self.assertEqual(len(self.validate(["2026-08-01,Dam,,,"])), 1)
 
+    def test_nonpositive_capacity(self):
+        for value in ("0", "-10"):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "capacity_mm3"):
+                self.validate([f"2026-08-01,Dam,{value},25,25"])
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 
