@@ -40,6 +40,14 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, "capacity_mm3"):
                 self.validate([f"2026-08-01,Dam,{value},25,25"])
 
+    def test_negative_measurements(self):
+        for row in ("2026-08-01,Dam,100,-1,25", "2026-08-01,Dam,100,25,-1"):
+            with self.subTest(row=row), self.assertRaisesRegex(ValueError, "nonnegative"):
+                self.validate([row])
+
+    def test_zero_and_above_capacity_measurements(self):
+        self.validate(["2026-08-01,Dam,100,0,0", "2026-08-02,Dam,100,110,110"])
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 

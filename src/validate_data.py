@@ -39,4 +39,7 @@ def validate_csv(path):
                 raise ValueError(f"Line {line}: {column} must be finite")
         if row["capacity_mm3"] and float(row["capacity_mm3"]) <= 0:
             raise ValueError(f"Line {line}: capacity_mm3 must be positive when present")
+        for column in ("reserve_mm3", "fill_rate"):
+            if row[column] and float(row[column]) < 0:
+                raise ValueError(f"Line {line}: {column} must be nonnegative")
     return rows
