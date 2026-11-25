@@ -24,6 +24,17 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, "dam"):
                 self.validate([f"2026-08-01,{value},100,25,25"])
 
+    def test_invalid_measurements(self):
+        for column in range(2, 5):
+            for value in ("nan", "inf", "-inf", "unknown"):
+                row = ["2026-08-01", "Dam", "100", "25", "25"]
+                row[column] = value
+                with self.subTest(column=column, value=value), self.assertRaises(ValueError):
+                    self.validate([",".join(row)])
+
+    def test_missing_measurements(self):
+        self.assertEqual(len(self.validate(["2026-08-01,Dam,,,"])), 1)
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 

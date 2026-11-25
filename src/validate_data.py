@@ -1,6 +1,7 @@
 """Read and validate TensiftWatch processed CSV files without dependencies."""
 
 import csv
+import math
 from datetime import date
 from pathlib import Path
 
@@ -27,4 +28,13 @@ def validate_csv(path):
             raise ValueError(f"Line {line}: date must be a valid YYYY-MM-DD") from None
         if not row["dam"].strip() or row["dam"] != row["dam"].strip():
             raise ValueError(f"Line {line}: dam must be nonblank without surrounding whitespace")
+        for column in COLUMNS[2:]:
+            if row[column] == "":
+                continue  # Missing measurements are retained by the cleaning notebooks.
+            try:
+                value = float(row[column])
+            except ValueError:
+                raise ValueError(f"Line {line}: {column} must be numeric or empty") from None
+            if not math.isfinite(value):
+                raise ValueError(f"Line {line}: {column} must be finite")
     return rows
