@@ -2,7 +2,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from src.validate_data import COLUMNS, validate_csv
+from src.validate_data import COLUMNS, summarize, validate_csv
 
 
 class ValidationTests(unittest.TestCase):
@@ -55,6 +55,14 @@ class ValidationTests(unittest.TestCase):
 
     def test_same_date_for_different_dams(self):
         self.validate(["2026-08-01,Dam A,100,25,25", "2026-08-01,Dam B,100,25,25"])
+
+    def test_summary(self):
+        rows = self.validate(["2026-08-02,Dam,100,,25", "2026-08-01,Dam,100,25,"])
+        result = summarize(rows)
+        self.assertEqual((result["rows"], result["dams"]), (2, 1))
+        self.assertEqual((result["start"], result["end"]), ("2026-08-01", "2026-08-02"))
+        self.assertEqual(result["missing"], {"capacity_mm3": 0, "reserve_mm3": 1, "fill_rate": 1})
+        self.assertIsNone(summarize([])["start"])
 
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)

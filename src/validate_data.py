@@ -48,3 +48,18 @@ def validate_csv(path):
             raise ValueError(f"Line {line}: duplicate dam/date observation {key}")
         seen.add(key)
     return rows
+
+
+def summarize(rows):
+    """Summarize validated observations without filling missing measurements."""
+    dates = [row["date"] for row in rows]
+    return {
+        "rows": len(rows),
+        "dams": len({row["dam"] for row in rows}),
+        "start": min(dates) if dates else None,
+        "end": max(dates) if dates else None,
+        "missing": {
+            column: sum(row[column] == "" for row in rows)
+            for column in COLUMNS[2:]
+        },
+    }
