@@ -25,4 +25,6 @@ def validate_csv(path):
                 raise ValueError
         except ValueError:
             raise ValueError(f"Line {line}: date must be a valid YYYY-MM-DD") from None
+        if not row["dam"].strip() or row["dam"] != row["dam"].strip():
+            raise ValueError(f"Line {line}: dam must be nonblank without surrounding whitespace")
     return rows

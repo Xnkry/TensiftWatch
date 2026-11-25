@@ -19,6 +19,11 @@ class ValidationTests(unittest.TestCase):
             with self.subTest(value=value), self.assertRaisesRegex(ValueError, "date"):
                 self.validate([f"{value},Dam,100,25,25"])
 
+    def test_invalid_names(self):
+        for value in ("", " ", " Dam", "Dam "):
+            with self.subTest(value=value), self.assertRaisesRegex(ValueError, "dam"):
+                self.validate([f"2026-08-01,{value},100,25,25"])
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 
