@@ -1,3 +1,4 @@
+import csv
 import contextlib
 import io
 import json
@@ -79,6 +80,10 @@ class ValidationTests(unittest.TestCase):
             self.assertEqual(json.loads(output.getvalue())["rows"], 1)
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(main([str(path)]), 0)
+
+    def test_unclosed_quoted_field(self):
+        with self.assertRaises(csv.Error):
+            self.validate(['2026-08-01,"Dam,100,25,25'])
 
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)

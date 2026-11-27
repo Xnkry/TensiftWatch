@@ -11,7 +11,7 @@ COLUMNS = ("date", "dam", "capacity_mm3", "reserve_mm3", "fill_rate")
 def validate_csv(path):
     """Return observations, raising ValueError for invalid data."""
     with Path(path).open(newline="", encoding="utf-8-sig") as stream:
-        reader = csv.DictReader(stream)
+        reader = csv.DictReader(stream, strict=True)
         if reader.fieldnames != list(COLUMNS):
             raise ValueError(f"Expected columns: {', '.join(COLUMNS)}")
         rows = list(reader)
