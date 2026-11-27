@@ -143,3 +143,37 @@ Run the validator's regression tests without installing extra dependencies:
 ```sh
 python -m unittest discover -s tests
 ```
+
+### Data quality reports
+
+Generate a JSON report without installing additional packages:
+
+```sh
+python -m src.data_report data/processed/tensift_cleaned.csv
+python -m src.data_report data/processed/tensift_cleaned.csv --dam "Lalla Takerkoust"
+```
+
+The report includes overall and per-dam coverage, missing-day counts,
+observations exceeding capacity or 100% fill, and monthly measurement counts,
+minimums, maximums, and means for each dam. Months include the year. Missing
+measurements are excluded from statistics; an entirely missing measurement has
+count zero and JSON `null` statistics. Recorded zero values remain included.
+
+Missing days are counted only between each dam's own first and last observation.
+This does not detect missing observations outside those bounds or dams absent
+from the file. Exceedances are investigation flags, not validation failures or
+automatic corrections. Monthly means give equal weight to available observations;
+they are not capacity-weighted basin totals or estimates of unobserved days.
+
+Multiple paths produce one JSON line per valid file, without merging datasets.
+Errors go to standard error and yield exit status 1; other files are still
+processed. `--dam` matches an exact name and fails if it has no observations.
+The entire input is validated before filtering. Reports never modify input files.
+Redirect standard output to a file if you want to save a report:
+
+```sh
+python -m src.data_report data/processed/tensift_cleaned.csv > /tmp/tensift-report.jsonl
+```
+
+CSV validation rejects malformed quoting. Row diagnostics identify the physical
+line where a record ends, including records containing quoted multiline fields.
