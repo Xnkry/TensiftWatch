@@ -53,3 +53,14 @@ def exceedances(rows):
         if reasons:
             findings.append({"date": row["date"], "dam": row["dam"], "reasons": reasons})
     return findings
+
+
+def monthly_stats(rows):
+    """Group measurement summaries by dam and calendar year-month."""
+    groups = defaultdict(list)
+    for row in rows:
+        groups[(row["dam"], row["date"][:7])].append(row)
+    return [
+        {"dam": dam, "month": month, "rows": len(group), "measurements": measurement_stats(group)}
+        for (dam, month), group in sorted(groups.items())
+    ]

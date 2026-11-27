@@ -32,3 +32,11 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(row["reserve_mm3"], "110")
         self.assertEqual(report.exceedances([observation(reserve="100", fill="100")]), [])
         self.assertEqual(report.exceedances([observation(capacity="", fill="")]), [])
+
+    def test_monthly_stats_separate_years_and_dams(self):
+        rows = [observation("2027-08-01"), observation("2026-08-02", reserve=""),
+                observation("2026-08-01"), observation(dam="Other")]
+        result = report.monthly_stats(rows)
+        self.assertEqual([(item["dam"], item["month"], item["rows"]) for item in result],
+                         [("Dam", "2026-08", 2), ("Dam", "2027-08", 1), ("Other", "2026-08", 1)])
+        self.assertEqual(result[0]["measurements"]["reserve_mm3"]["count"], 1)
