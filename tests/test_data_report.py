@@ -24,3 +24,11 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(report.measurement_stats(rows)["reserve_mm3"],
                          {"count": 2, "min": 0, "max": 30, "mean": 15})
         self.assertIsNone(report.measurement_stats([])["fill_rate"]["mean"])
+
+    def test_exceedances_preserve_observations(self):
+        row = observation(reserve="110", fill="110")
+        self.assertEqual(report.exceedances([row])[0]["reasons"],
+                         ["reserve_above_capacity", "fill_above_100"])
+        self.assertEqual(row["reserve_mm3"], "110")
+        self.assertEqual(report.exceedances([observation(reserve="100", fill="100")]), [])
+        self.assertEqual(report.exceedances([observation(capacity="", fill="")]), [])

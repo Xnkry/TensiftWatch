@@ -38,3 +38,18 @@ def measurement_stats(rows):
             "mean": mean(values) if values else None,
         }
     return result
+
+
+def exceedances(rows):
+    """Flag values for investigation without rejecting or correcting them."""
+    findings = []
+    for row in sorted(rows, key=lambda row: (row["date"], row["dam"])):
+        reasons = []
+        if row["capacity_mm3"] and row["reserve_mm3"]:
+            if float(row["reserve_mm3"]) > float(row["capacity_mm3"]):
+                reasons.append("reserve_above_capacity")
+        if row["fill_rate"] and float(row["fill_rate"]) > 100:
+            reasons.append("fill_above_100")
+        if reasons:
+            findings.append({"date": row["date"], "dam": row["dam"], "reasons": reasons})
+    return findings
