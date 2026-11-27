@@ -18,3 +18,9 @@ class ReportTests(unittest.TestCase):
         rows = [observation("2026-09-02"), observation("2026-08-31"), observation(dam="Other")]
         self.assertEqual(report.gaps_by_dam(rows), {"Dam": 1, "Other": 0})
         self.assertEqual(report.gaps_by_dam([]), {})
+
+    def test_stats_exclude_missing_and_include_zero(self):
+        rows = [observation(reserve=""), observation(reserve="0"), observation(reserve="30")]
+        self.assertEqual(report.measurement_stats(rows)["reserve_mm3"],
+                         {"count": 2, "min": 0, "max": 30, "mean": 15})
+        self.assertIsNone(report.measurement_stats([])["fill_rate"]["mean"])
