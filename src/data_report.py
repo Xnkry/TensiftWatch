@@ -87,11 +87,16 @@ def main(argv=None):
 
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path, help="Processed CSV files")
+    parser.add_argument("--dam", help="Report only this exact dam name; validate the entire file")
     args = parser.parse_args(argv)
     failed = False
     for path in args.paths:
         try:
             rows = validate_csv(path)
+            if args.dam is not None:
+                rows = [row for row in rows if row["dam"] == args.dam]
+                if not rows:
+                    raise ValueError(f"No observations for dam: {args.dam}")
             result = build_report(rows)
         except (OSError, UnicodeError, ValueError, csv.Error) as error:
             print(f"{path}: {error}", file=sys.stderr)

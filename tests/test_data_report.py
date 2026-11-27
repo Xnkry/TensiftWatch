@@ -58,3 +58,18 @@ class ReportTests(unittest.TestCase):
             self.assertEqual(json.loads(output.getvalue())["summary"]["rows"], 1)
             with contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(report.main([str(path)]), 0)
+
+    def test_cli_dam_filter_and_unknown_name(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data.csv"
+            path.write_text(",".join(report.COLUMNS) +
+                            "\n2026-08-01,Dam,100,25,25\n2026-08-01,Other,100,50,50\n")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(report.main([str(path), "--dam", "Other"]), 0)
+            self.assertEqual(list(json.loads(output.getvalue())["coverage_by_dam"]), ["Other"])
+            with contextlib.redirect_stderr(io.StringIO()), contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(report.main([str(path), "--dam", "Unknown"]), 1)
+                with path.open("a") as stream:
+                    stream.write("invalid,Dam,100,25,25\n")
+                self.assertEqual(report.main([str(path), "--dam", "Other"]), 1)
