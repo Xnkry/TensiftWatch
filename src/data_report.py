@@ -64,3 +64,42 @@ def monthly_stats(rows):
         {"dam": dam, "month": month, "rows": len(group), "measurements": measurement_stats(group)}
         for (dam, month), group in sorted(groups.items())
     ]
+
+
+def build_report(rows):
+    """Build a JSON-compatible report from validated observations."""
+    return {
+        "summary": summarize(rows),
+        "coverage_by_dam": coverage_by_dam(rows),
+        "missing_days_by_dam": gaps_by_dam(rows),
+        "exceedances": exceedances(rows),
+        "monthly": monthly_stats(rows),
+    }
+
+
+def main(argv=None):
+    """Print one JSON report per valid input; continue after input errors."""
+    import argparse
+    import csv
+    import json
+    import sys
+    from pathlib import Path
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("paths", nargs="+", type=Path, help="Processed CSV files")
+    args = parser.parse_args(argv)
+    failed = False
+    for path in args.paths:
+        try:
+            rows = validate_csv(path)
+            result = build_report(rows)
+        except (OSError, UnicodeError, ValueError, csv.Error) as error:
+            print(f"{path}: {error}", file=sys.stderr)
+            failed = True
+        else:
+            print(json.dumps({"path": str(path), **result}, sort_keys=True, allow_nan=False))
+    return int(failed)
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())

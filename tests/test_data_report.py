@@ -1,3 +1,8 @@
+import contextlib
+import io
+import json
+import tempfile
+from pathlib import Path
 import unittest
 
 from src import data_report as report
@@ -40,3 +45,16 @@ class ReportTests(unittest.TestCase):
         self.assertEqual([(item["dam"], item["month"], item["rows"]) for item in result],
                          [("Dam", "2026-08", 2), ("Dam", "2027-08", 1), ("Other", "2026-08", 1)])
         self.assertEqual(result[0]["measurements"]["reserve_mm3"]["count"], 1)
+
+    def test_cli_reports_valid_files_after_invalid_input(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data.csv"
+            path.write_text(",".join(report.COLUMNS) + "\n2026-08-01,Dam,100,25,25\n")
+            output, errors = io.StringIO(), io.StringIO()
+            with contextlib.redirect_stdout(output), contextlib.redirect_stderr(errors):
+                status = report.main([str(path.with_name("absent.csv")), str(path)])
+            self.assertEqual(status, 1)
+            self.assertIn("absent.csv", errors.getvalue())
+            self.assertEqual(json.loads(output.getvalue())["summary"]["rows"], 1)
+            with contextlib.redirect_stdout(io.StringIO()):
+                self.assertEqual(report.main([str(path)]), 0)
