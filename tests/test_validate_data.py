@@ -85,6 +85,10 @@ class ValidationTests(unittest.TestCase):
         with self.assertRaises(csv.Error):
             self.validate(['2026-08-01,"Dam,100,25,25'])
 
+    def test_physical_line_after_blank_line(self):
+        with self.assertRaisesRegex(ValueError, "Line 4: date"):
+            self.validate(["2026-08-01,Dam,100,25,25", "", "bad,Dam,100,25,25"])
+
     def test_valid_csv(self):
         self.assertEqual(len(self.validate()), 1)
 

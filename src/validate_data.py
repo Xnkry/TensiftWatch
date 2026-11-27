@@ -14,11 +14,11 @@ def validate_csv(path):
         reader = csv.DictReader(stream, strict=True)
         if reader.fieldnames != list(COLUMNS):
             raise ValueError(f"Expected columns: {', '.join(COLUMNS)}")
-        rows = list(reader)
-    if not rows:
+        records = [(reader.line_num, row) for row in reader]
+    if not records:
         raise ValueError("Dataset contains no observations")
     seen = set()
-    for line, row in enumerate(rows, start=2):
+    for line, row in records:
         if None in row or any(value is None for value in row.values()):
             raise ValueError(f"Line {line}: expected {len(COLUMNS)} fields")
         try:
@@ -47,7 +47,7 @@ def validate_csv(path):
         if key in seen:
             raise ValueError(f"Line {line}: duplicate dam/date observation {key}")
         seen.add(key)
-    return rows
+    return [row for _, row in records]
 
 
 def summarize(rows):
