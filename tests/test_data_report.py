@@ -13,3 +13,8 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(list(result), ["A", "Z"])
         self.assertEqual(result["A"]["rows"], 1)
         self.assertEqual(report.coverage_by_dam([]), {})
+
+    def test_gaps_across_months(self):
+        rows = [observation("2026-09-02"), observation("2026-08-31"), observation(dam="Other")]
+        self.assertEqual(report.gaps_by_dam(rows), {"Dam": 1, "Other": 0})
+        self.assertEqual(report.gaps_by_dam([]), {})
