@@ -1,0 +1,21 @@
+name: Data and regression checks
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run regression tests
+        run: python -m unittest discover -s tests
+      - name: Validate committed datasets
+        run: python -m src.validate_data data/processed/tensift_august_2026.csv data/processed/tensift_cleaned.csv
+      - name: Generate quality reports
+        run: python -m src.data_report data/processed/tensift_august_2026.csv data/processed/tensift_cleaned.csv > /tmp/tensift-reports.jsonl
