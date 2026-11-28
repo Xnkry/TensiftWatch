@@ -119,3 +119,12 @@ class ReportTests(unittest.TestCase):
                          [{"dam": "Dam", "start": "2026-08-01", "end": "2026-08-04",
                            "days": 3, "change_mm3": -15, "change_mm3_per_day": -5}])
         self.assertEqual(report.reserve_changes([]), [])
+
+    def test_capacity_changes_compare_available_numeric_values(self):
+        rows = [observation("2026-08-04", capacity="120"), observation("2026-08-03", capacity=""),
+                observation("2026-08-02", capacity="100.0"), observation("2026-08-01"),
+                observation(dam="Other", capacity="200")]
+        self.assertEqual(report.capacity_changes(rows),
+                         [{"dam": "Dam", "start": "2026-08-02", "end": "2026-08-04",
+                           "previous_mm3": 100, "current_mm3": 120}])
+        self.assertEqual(report.capacity_changes([]), [])

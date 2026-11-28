@@ -128,6 +128,24 @@ def reserve_changes(rows):
     return result
 
 
+def capacity_changes(rows):
+    """Flag changes between consecutive available capacity measurements."""
+    previous = {}
+    result = []
+    for row in sorted(rows, key=lambda row: (row["dam"], row["date"])):
+        if row["capacity_mm3"] == "":
+            continue
+        dam = row["dam"]
+        capacity = float(row["capacity_mm3"])
+        if dam in previous:
+            prior = previous[dam]
+            if capacity != float(prior["capacity_mm3"]):
+                result.append({"dam": dam, "start": prior["date"], "end": row["date"],
+                               "previous_mm3": float(prior["capacity_mm3"]), "current_mm3": capacity})
+        previous[dam] = row
+    return result
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
@@ -135,6 +153,7 @@ def build_report(rows):
         "completeness_by_dam": completeness_by_dam(rows),
         "latest_by_dam": latest_by_dam(rows),
         "reserve_changes": reserve_changes(rows),
+        "capacity_changes": capacity_changes(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),
