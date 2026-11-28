@@ -66,9 +66,28 @@ def monthly_stats(rows):
     ]
 
 
+def gap_intervals(rows):
+    """List missing date intervals between consecutive observations per dam."""
+    from datetime import timedelta
+
+    groups = defaultdict(set)
+    for row in rows:
+        groups[row["dam"]].add(date.fromisoformat(row["date"]))
+    result = []
+    for dam, days in sorted(groups.items()):
+        ordered = sorted(days)
+        for previous, current in zip(ordered, ordered[1:]):
+            missing = (current - previous).days - 1
+            if missing:
+                result.append({"dam": dam, "start": (previous + timedelta(days=1)).isoformat(),
+                               "end": (current - timedelta(days=1)).isoformat(), "days": missing})
+    return result
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
+        "gap_intervals": gap_intervals(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),

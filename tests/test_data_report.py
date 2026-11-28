@@ -88,3 +88,9 @@ class ReportTests(unittest.TestCase):
                 self.assertEqual(report.main([str(path), "--end", "2026-07-31"]), 1)
                 with self.assertRaises(SystemExit):
                     report.main([str(path), "--start", "2026-08-02", "--end", "2026-08-01"])
+
+    def test_gap_intervals_handle_leap_day_and_unsorted_rows(self):
+        rows = [observation("2024-03-01"), observation("2024-02-28"), observation(dam="Other")]
+        self.assertEqual(report.gap_intervals(rows),
+                         [{"dam": "Dam", "start": "2024-02-29", "end": "2024-02-29", "days": 1}])
+        self.assertEqual(report.gap_intervals([]), [])
