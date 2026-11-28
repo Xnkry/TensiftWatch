@@ -146,6 +146,15 @@ def capacity_changes(rows):
     return result
 
 
+def annual_stats(rows):
+    """Group available measurement summaries by dam and calendar year."""
+    groups = defaultdict(list)
+    for row in rows:
+        groups[(row["dam"], row["date"][:4])].append(row)
+    return [{"dam": dam, "year": year, "rows": len(group), "measurements": measurement_stats(group)}
+            for (dam, year), group in sorted(groups.items())]
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
@@ -154,6 +163,7 @@ def build_report(rows):
         "latest_by_dam": latest_by_dam(rows),
         "reserve_changes": reserve_changes(rows),
         "capacity_changes": capacity_changes(rows),
+        "annual_stats": annual_stats(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),

@@ -128,3 +128,13 @@ class ReportTests(unittest.TestCase):
                          [{"dam": "Dam", "start": "2026-08-02", "end": "2026-08-04",
                            "previous_mm3": 100, "current_mm3": 120}])
         self.assertEqual(report.capacity_changes([]), [])
+
+    def test_annual_stats_do_not_average_monthly_means(self):
+        rows = [observation("2026-08-01", reserve="0"), observation("2026-08-02", reserve="0"),
+                observation("2026-09-01", reserve="90"), observation("2027-01-01"),
+                observation(dam="Other")]
+        result = report.annual_stats(rows)
+        self.assertEqual([(r["dam"], r["year"]) for r in result],
+                         [("Dam", "2026"), ("Dam", "2027"), ("Other", "2026")])
+        self.assertEqual(result[0]["measurements"]["reserve_mm3"]["mean"], 30)
+        self.assertEqual(report.annual_stats([]), [])
