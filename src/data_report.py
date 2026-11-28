@@ -88,7 +88,11 @@ def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("paths", nargs="+", type=Path, help="Processed CSV files")
     parser.add_argument("--dam", help="Report only this exact dam name; validate the entire file")
+    parser.add_argument("--start", type=date.fromisoformat, help="Inclusive start date (YYYY-MM-DD)")
+    parser.add_argument("--end", type=date.fromisoformat, help="Inclusive end date (YYYY-MM-DD)")
     args = parser.parse_args(argv)
+    if args.start and args.end and args.start > args.end:
+        parser.error("--start must not be after --end")
     failed = False
     for path in args.paths:
         try:
@@ -97,6 +101,11 @@ def main(argv=None):
                 rows = [row for row in rows if row["dam"] == args.dam]
                 if not rows:
                     raise ValueError(f"No observations for dam: {args.dam}")
+            rows = [row for row in rows
+                    if (args.start is None or date.fromisoformat(row["date"]) >= args.start)
+                    and (args.end is None or date.fromisoformat(row["date"]) <= args.end)]
+            if not rows:
+                raise ValueError("No observations in the selected date range")
             result = build_report(rows)
         except (OSError, UnicodeError, ValueError, csv.Error) as error:
             print(f"{path}: {error}", file=sys.stderr)

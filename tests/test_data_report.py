@@ -73,3 +73,18 @@ class ReportTests(unittest.TestCase):
                 with path.open("a") as stream:
                     stream.write("invalid,Dam,100,25,25\n")
                 self.assertEqual(report.main([str(path), "--dam", "Other"]), 1)
+
+    def test_cli_date_bounds(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "data.csv"
+            path.write_text(",".join(report.COLUMNS) +
+                            "\n2026-08-01,Dam,100,25,25\n2026-08-02,Dam,100,50,50\n")
+            output = io.StringIO()
+            with contextlib.redirect_stdout(output):
+                self.assertEqual(report.main([str(path), "--start", "2026-08-02",
+                                              "--end", "2026-08-02"]), 0)
+            self.assertEqual(json.loads(output.getvalue())["summary"]["rows"], 1)
+            with contextlib.redirect_stderr(io.StringIO()):
+                self.assertEqual(report.main([str(path), "--end", "2026-07-31"]), 1)
+                with self.assertRaises(SystemExit):
+                    report.main([str(path), "--start", "2026-08-02", "--end", "2026-08-01"])
