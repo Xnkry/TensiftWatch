@@ -138,3 +138,11 @@ class ReportTests(unittest.TestCase):
                          [("Dam", "2026"), ("Dam", "2027"), ("Other", "2026")])
         self.assertEqual(result[0]["measurements"]["reserve_mm3"]["mean"], 30)
         self.assertEqual(report.annual_stats([]), [])
+
+    def test_period_measurements_separate_dams_and_missing_values(self):
+        rows = [observation(reserve="0"), observation(reserve="10"), observation(reserve=""),
+                observation(dam="Other", reserve="90")]
+        result = report.measurements_by_dam(rows)
+        self.assertEqual(result["Dam"]["reserve_mm3"], {"count": 2, "min": 0, "max": 10, "mean": 5})
+        self.assertEqual(result["Other"]["reserve_mm3"]["mean"], 90)
+        self.assertEqual(report.measurements_by_dam([]), {})
