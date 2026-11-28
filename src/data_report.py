@@ -84,10 +84,25 @@ def gap_intervals(rows):
     return result
 
 
+def completeness_by_dam(rows):
+    """Describe measurement availability as percentages of observed rows."""
+    groups = defaultdict(list)
+    for row in rows:
+        groups[row["dam"]].append(row)
+    return {
+        dam: {column: {"present": sum(row[column] != "" for row in group),
+                       "missing": sum(row[column] == "" for row in group),
+                       "percent_present": 100 * sum(row[column] != "" for row in group) / len(group)}
+              for column in COLUMNS[2:]}
+        for dam, group in sorted(groups.items())
+    }
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
         "gap_intervals": gap_intervals(rows),
+        "completeness_by_dam": completeness_by_dam(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),

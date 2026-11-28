@@ -94,3 +94,11 @@ class ReportTests(unittest.TestCase):
         self.assertEqual(report.gap_intervals(rows),
                          [{"dam": "Dam", "start": "2024-02-29", "end": "2024-02-29", "days": 1}])
         self.assertEqual(report.gap_intervals([]), [])
+
+    def test_completeness_keeps_zero_and_separates_dams(self):
+        rows = [observation(reserve=""), observation(reserve="0"), observation(dam="Other")]
+        result = report.completeness_by_dam(rows)
+        self.assertEqual(result["Dam"]["reserve_mm3"],
+                         {"present": 1, "missing": 1, "percent_present": 50})
+        self.assertEqual(result["Other"]["reserve_mm3"]["percent_present"], 100)
+        self.assertEqual(report.completeness_by_dam([]), {})
