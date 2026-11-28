@@ -102,3 +102,12 @@ class ReportTests(unittest.TestCase):
                          {"present": 1, "missing": 1, "percent_present": 50})
         self.assertEqual(result["Other"]["reserve_mm3"]["percent_present"], 100)
         self.assertEqual(report.completeness_by_dam([]), {})
+
+    def test_latest_does_not_backfill_missing_measurements(self):
+        rows = [observation("2026-08-02", reserve=""), observation("2026-08-01"),
+                observation(dam="Other", reserve="0")]
+        result = report.latest_by_dam(rows)
+        self.assertEqual(result["Dam"]["date"], "2026-08-02")
+        self.assertIsNone(result["Dam"]["reserve_mm3"])
+        self.assertEqual(result["Other"]["reserve_mm3"], 0)
+        self.assertEqual(report.latest_by_dam([]), {})

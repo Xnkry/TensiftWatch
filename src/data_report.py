@@ -98,11 +98,25 @@ def completeness_by_dam(rows):
     }
 
 
+def latest_by_dam(rows):
+    """Return each dam's latest observation, retaining missing measurements."""
+    latest = {}
+    for row in rows:
+        dam = row["dam"]
+        if dam not in latest or row["date"] > latest[dam]["date"]:
+            latest[dam] = row
+    return {dam: {"date": row["date"],
+                  **{column: float(row[column]) if row[column] != "" else None
+                     for column in COLUMNS[2:]}}
+            for dam, row in sorted(latest.items())}
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
         "gap_intervals": gap_intervals(rows),
         "completeness_by_dam": completeness_by_dam(rows),
+        "latest_by_dam": latest_by_dam(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),
