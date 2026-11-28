@@ -177,3 +177,41 @@ python -m src.data_report data/processed/tensift_cleaned.csv > /tmp/tensift-repo
 
 CSV validation rejects malformed quoting. Row diagnostics identify the physical
 line where a record ends, including records containing quoted multiline fields.
+
+### Selecting a reporting period
+
+Date bounds are inclusive and may be used independently or together with an
+exact dam name:
+
+```sh
+python -m src.data_report data/processed/tensift_cleaned.csv --start 2026-09-01 --end 2026-09-30 --dam "Lalla Takerkoust"
+```
+
+The whole file is validated before selecting observations. Reversed bounds are
+command-line errors; a selection containing no observations fails for that file.
+All report sections describe only the selected observations.
+
+### Additional report sections
+
+| JSON key | Contents |
+| --- | --- |
+| `gap_intervals` | Inclusive start and end dates and day counts for missing intervals within each dam's observed coverage |
+| `completeness_by_dam` | Present and missing measurement counts, plus percentage present among observed rows |
+| `latest_by_dam` | Latest observed date and numeric measurements per dam; missing measurements remain `null` |
+| `reserve_changes` | Change in Mm³ and average change in Mm³/day between consecutive available reserve measurements |
+| `capacity_changes` | Previous and current reported capacities when consecutive available values differ |
+| `annual_stats` | Measurement counts, extrema, and means per dam and calendar year |
+| `measurements_by_dam` | Measurement statistics over the entire selected period for each dam |
+
+Completeness percentages describe recorded rows, not expected calendar days.
+Gap intervals exclude dates outside a dam's observed bounds, including the
+edges of a requested date range. Latest dates may differ between dams; missing
+latest measurements are not filled from older observations.
+
+Reserve changes skip missing measurements and divide by the actual elapsed
+calendar days. They are net storage changes, not estimates of inflow, outflow,
+or a daily trajectory between observations. Capacity changes are investigation
+flags and may reflect source revisions. Both change sections compare only
+observations inside the selected period and never borrow a preceding record
+from outside it. Annual and full-period means weight each available observation
+equally, including zero, rather than averaging monthly means.
