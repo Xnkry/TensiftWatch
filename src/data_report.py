@@ -111,12 +111,30 @@ def latest_by_dam(rows):
             for dam, row in sorted(latest.items())}
 
 
+def reserve_changes(rows):
+    """Compare consecutive available reserves using actual elapsed days."""
+    groups = defaultdict(list)
+    for row in rows:
+        if row["reserve_mm3"] != "":
+            groups[row["dam"]].append(row)
+    result = []
+    for dam, group in sorted(groups.items()):
+        ordered = sorted(group, key=lambda row: row["date"])
+        for previous, current in zip(ordered, ordered[1:]):
+            days = (date.fromisoformat(current["date"]) - date.fromisoformat(previous["date"])).days
+            change = float(current["reserve_mm3"]) - float(previous["reserve_mm3"])
+            result.append({"dam": dam, "start": previous["date"], "end": current["date"],
+                           "days": days, "change_mm3": change, "change_mm3_per_day": change / days})
+    return result
+
+
 def build_report(rows):
     """Build a JSON-compatible report from validated observations."""
     return {
         "gap_intervals": gap_intervals(rows),
         "completeness_by_dam": completeness_by_dam(rows),
         "latest_by_dam": latest_by_dam(rows),
+        "reserve_changes": reserve_changes(rows),
         "summary": summarize(rows),
         "coverage_by_dam": coverage_by_dam(rows),
         "missing_days_by_dam": gaps_by_dam(rows),

@@ -111,3 +111,11 @@ class ReportTests(unittest.TestCase):
         self.assertIsNone(result["Dam"]["reserve_mm3"])
         self.assertEqual(result["Other"]["reserve_mm3"], 0)
         self.assertEqual(report.latest_by_dam([]), {})
+
+    def test_reserve_changes_use_elapsed_days_and_skip_missing(self):
+        rows = [observation("2026-08-04", reserve="10"), observation("2026-08-02", reserve=""),
+                observation("2026-08-01", reserve="25"), observation(dam="Other")]
+        self.assertEqual(report.reserve_changes(rows),
+                         [{"dam": "Dam", "start": "2026-08-01", "end": "2026-08-04",
+                           "days": 3, "change_mm3": -15, "change_mm3_per_day": -5}])
+        self.assertEqual(report.reserve_changes([]), [])
